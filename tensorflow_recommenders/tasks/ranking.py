@@ -67,7 +67,8 @@ class Ranking(tf.keras.layers.Layer, base.Task):
            labels: tf.Tensor,
            predictions: tf.Tensor,
            sample_weight: Optional[tf.Tensor] = None,
-           training: bool = False) -> tf.Tensor:
+           training: bool = False,
+           compute_metrics: bool = True) -> tf.Tensor:
     """Computes the task loss and metrics.
 
     Args:
@@ -75,6 +76,8 @@ class Ranking(tf.keras.layers.Layer, base.Task):
       predictions: Tensor of predictions.
       sample_weight: Tensor of sample weights.
       training: Indicator whether training or test loss is being computed.
+      compute_metrics: Whether to compute metrics. Set this to False
+        during training for faster training.
 
     Returns:
       loss: Tensor of loss values.
@@ -83,6 +86,9 @@ class Ranking(tf.keras.layers.Layer, base.Task):
     loss = self._loss(
         y_true=labels, y_pred=predictions, sample_weight=sample_weight)
 
+    if not compute_metrics:
+      return loss
+
     update_ops = []
 
     for metric in self._ranking_metrics:
@@ -90,10 +96,12 @@ class Ranking(tf.keras.layers.Layer, base.Task):
           y_true=labels, y_pred=predictions, sample_weight=sample_weight))
 
     for metric in self._prediction_metrics:
-      update_ops.append(metric.update_state(predictions))
+      update_ops.append(
+          metric.update_state(predictions, sample_weight=sample_weight))
 
     for metric in self._label_metrics:
-      update_ops.append(metric.update_state(labels))
+      update_ops.append(
+          metric.update_state(labels, sample_weight=sample_weight))
 
     with tf.control_dependencies(update_ops):
       return tf.identity(loss)

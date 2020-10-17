@@ -20,7 +20,7 @@ from typing import Optional, Text
 import tensorflow as tf
 
 from tensorflow_recommenders import layers
-from tensorflow_recommenders.metrics.corpus import FactorizedTopK
+from tensorflow_recommenders import metrics as tfrs_metrics
 from tensorflow_recommenders.tasks import base
 
 
@@ -39,13 +39,12 @@ class Retrieval(tf.keras.layers.Layer, base.Task):
   scoring function.
   """
 
-  def __init__(
-      self,
-      loss: Optional[tf.keras.losses.Loss] = None,
-      metrics: Optional[FactorizedTopK] = None,
-      temperature: Optional[float] = None,
-      num_hard_negatives: Optional[int] = None,
-      name: Optional[Text] = None) -> None:
+  def __init__(self,
+               loss: Optional[tf.keras.losses.Loss] = None,
+               metrics: Optional[tfrs_metrics.FactorizedTopK] = None,
+               temperature: Optional[float] = None,
+               num_hard_negatives: Optional[int] = None,
+               name: Optional[Text] = None) -> None:
     """Initializes the task.
 
     Args:
@@ -55,7 +54,7 @@ class Retrieval(tf.keras.layers.Layer, base.Task):
        corpus of candidates. These metrics measure how good the model is at
        picking the true candidate out of all possible candidates in the system.
        Note, because the metrics range over the entire candidate set, they are
-       usually much slower to compute. Consider set `evaluate_metrics=False`
+       usually much slower to compute. Consider setting `compute_metrics=False`
        during training to save the time in computing the metrics.
       temperature: Temperature of the softmax.
       num_hard_negatives: If positive, the `num_hard_negatives` negative
@@ -70,9 +69,22 @@ class Retrieval(tf.keras.layers.Layer, base.Task):
     self._loss = loss if loss is not None else tf.keras.losses.CategoricalCrossentropy(
         from_logits=True, reduction=tf.keras.losses.Reduction.SUM)
 
-    self._corpus_metrics = metrics
+    self._factorized_metrics = metrics
     self._temperature = temperature
     self._num_hard_negatives = num_hard_negatives
+
+  @property
+  def factorized_metrics(self) -> Optional[tfrs_metrics.FactorizedTopK]:
+    """The metrics object used to compute retrieval metrics."""
+
+    return self._factorized_metrics
+
+  @factorized_metrics.setter
+  def factorized_metrics(self,
+                         value: Optional[tfrs_metrics.FactorizedTopK]) -> None:
+    """Sets factorized metrics."""
+
+    self._factorized_metrics = value
 
   def call(self,
            query_embeddings: tf.Tensor,
@@ -80,7 +92,7 @@ class Retrieval(tf.keras.layers.Layer, base.Task):
            sample_weight: Optional[tf.Tensor] = None,
            candidate_sampling_probability: Optional[tf.Tensor] = None,
            candidate_ids: Optional[tf.Tensor] = None,
-           evaluate_metrics: bool = True) -> tf.Tensor:
+           compute_metrics: bool = True) -> tf.Tensor:
     """Computes the task loss and metrics.
 
     The main argument are pairs of query and candidate embeddings: the first row
@@ -104,8 +116,8 @@ class Retrieval(tf.keras.layers.Layer, base.Task):
         enables removing accidental hits of examples used as negatives. An
         accidental hit is defined as an candidate that is used as an in-batch
         negative but has the same id with the positive candidate.
-      evaluate_metrics: If true, metrics will be computed. Because evaluating
-        metrics may be slow, consider disabling this in training.
+      compute_metrics: Whether to compute metrics. Set this to False
+        during training for faster training.
 
     Returns:
       loss: Tensor of loss values.
@@ -136,14 +148,14 @@ class Retrieval(tf.keras.layers.Layer, base.Task):
 
     loss = self._loss(y_true=labels, y_pred=scores, sample_weight=sample_weight)
 
-    if not self._corpus_metrics:
+    if not compute_metrics:
       return loss
 
-    if not evaluate_metrics:
+    if not self._factorized_metrics:
       return loss
 
-    update_op = self._corpus_metrics.update_state(
-        query_embeddings, candidate_embeddings)
+    update_op = self._factorized_metrics.update_state(query_embeddings,
+                                                      candidate_embeddings)
 
     with tf.control_dependencies([update_op]):
       return tf.identity(loss)

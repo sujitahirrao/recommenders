@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.0][2020-11-18]
+
+### Added
+
+-   Deep cross networks: efficient ways of learning feature interactions.
+-   ScaNN integration: efficient approximate maximum inner product search for
+    fast retrieval.
+
 ## [0.2.0][2020-10-15]
 
 ### Added

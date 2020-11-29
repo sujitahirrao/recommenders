@@ -17,7 +17,7 @@
 import pathlib
 import setuptools
 
-VERSION = "0.2.0"
+VERSION = "0.3.0"
 
 REQUIRED_PACKAGES = [
     "absl-py >= 0.1.6",
@@ -39,7 +39,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=REQUIRED_PACKAGES,
     extras_require={
-        "docs": ["fire", "annoy"],
+        "docs": ["fire", "annoy", "scann"],
     },
     # PyPI package information.
     classifiers=[

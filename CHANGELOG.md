@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.3.2][2020-12-22]
+
+### Changed
+
+-   Pinned TensorFlow to >= 2.3 when ScaNN is not being installed. When ScaNN is
+    being installed, we pin on >= 2.3, < 2.4. This allows users to use TFRS on
+    TF 2.4 when they are not using ScaNN.
+
+## [0.3.1][2020-12-22]
+
+### Changed
+
+-   Pinned TensorFlow to 2.3.x and ScaNN to 1.1.1 to ensure TF and ScaNN
+    versions are in lockstep.
+
 ## [0.3.0][2020-11-18]
 
 ### Added

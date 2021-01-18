@@ -12,6 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Metrics."""
+"""Embedding layers."""
 
-from tensorflow_recommenders.metrics.factorized_top_k import FactorizedTopK
+from tensorflow_recommenders.layers.embedding.tpu_embedding_layer import TPUEmbedding

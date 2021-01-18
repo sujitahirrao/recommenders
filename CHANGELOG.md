@@ -6,11 +6,16 @@
 
 -   `TopK` layers now come with a `query_with_exclusions` method, allowing
     certain candidates to be excluded from top-k retrieval.
+-   `TPUEmbedding` Keras layer for accelerating embedding lookups for large
+    tables with TPU.
 
 ### Changed
 
 -   `factorized_top_k.Streaming` layer now accepts a query model, like other
     `factorized_top_k` layers.
+
+-   Updated ScaNN to 1.2.0, which requires TensorFlow 2.4.x. When not using
+    ScaNN, any TF >= 2.3 is still supported.
 
 ## [0.3.2][2020-12-22]
 

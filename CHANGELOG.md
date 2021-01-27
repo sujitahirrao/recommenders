@@ -2,6 +2,13 @@
 
 ## [Unreleased][unreleased]
 
+### Changed
+
+-   Fixed the bug in `tfrs.layers.loss.SamplingProbablityCorrection` that logits
+    should substract the log of item probability.
+
+## [0.4.0][2021-01-20]
+
 ### Added
 
 -   `TopK` layers now come with a `query_with_exclusions` method, allowing

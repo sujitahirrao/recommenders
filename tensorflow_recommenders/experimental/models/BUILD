@@ -1,4 +1,4 @@
-load("//devtools/python/blaze:pytype.bzl", "py_library", "pytype_library")
+# Placeholder for internal Python library.
 # Placeholder for internal Python test library.
 
 licenses(["notice"])
@@ -17,7 +17,7 @@ py_library(
     ],
 )
 
-pytype_library(
+py_library(
     name = "ranking_model",
     srcs = ["ranking_model.py"],
     srcs_version = "PY3",
@@ -37,9 +37,8 @@ py_test(
     python_version = "PY3",
     srcs_version = "PY3",
     deps = [
-        ":ranking_model",
         # py/absl/testing:parameterized dep,
         # py/tensorflow dep,
-        "//tensorflow_recommenders/tasks",
+        "//tensorflow_recommenders",
     ],
 )
